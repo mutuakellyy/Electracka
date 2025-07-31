@@ -1,0 +1,15 @@
+Array
+(
+    [institution_id] => 1
+    [institution] => Multimedia University
+    [emailaddress] => joshiiikms@gmail.com
+    [id] => 2
+    [firstname] => Joshua
+    [surname] => Maitha
+    [securitynumber] => 0001
+    [contact] => 745395810
+    [password] => vo..fwM3iOvz.
+    [role] => guard
+    [created] => 2025-06-19 21:02:03
+    [active] => 1
+)
