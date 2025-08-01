@@ -15,4 +15,3 @@ while ($r = mysqli_fetch_assoc($res)) {
     echo "<tr><td>{$r['title']}</td><td>{$r['details']}</td><td>{$r['date_created']}</td></tr>";
 }
 echo "</table>";
-?>

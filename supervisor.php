@@ -131,6 +131,9 @@ require 'header.php';
             <?php endwhile; ?>
         </table>
     </div>
+
+
+    <!-- 📄 Reports to manager -->
     <div id="submitReport" class="tab">
         <h3>Submit Report to Manager</h3>
         <form id="supervisorReportForm" action="submit_supervisor_report.php">

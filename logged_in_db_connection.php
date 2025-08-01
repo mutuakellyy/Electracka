@@ -16,4 +16,3 @@
 		//redirect the user to the login page
 		header('Location: login.php');
 	}
-?>

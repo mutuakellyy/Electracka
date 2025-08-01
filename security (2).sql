@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Jul 31, 2025 at 10:21 AM
+-- Generation Time: Aug 01, 2025 at 09:43 AM
 -- Server version: 9.1.0
 -- PHP Version: 8.3.14
 
@@ -66,6 +66,9 @@ CREATE TABLE IF NOT EXISTS `guard_reports` (
   `location_id` int DEFAULT NULL,
   `details` text,
   `submitted_at` datetime DEFAULT NULL,
+  `scan_id` int DEFAULT NULL,
+  `location_name` varchar(100) DEFAULT NULL,
+  `scanned_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -73,9 +76,9 @@ CREATE TABLE IF NOT EXISTS `guard_reports` (
 -- Dumping data for table `guard_reports`
 --
 
-INSERT INTO `guard_reports` (`id`, `guard_email`, `institution_id`, `location_id`, `details`, `submitted_at`) VALUES
-(1, 'joshiiikms@gmail.com', 1, 1, 'there has been a student nabbed with some narcotics', '2025-07-28 11:53:31'),
-(2, 'joshiiikms@gmail.com', 1, 3, 'everything was well', '2025-07-28 16:37:50');
+INSERT INTO `guard_reports` (`id`, `guard_email`, `institution_id`, `location_id`, `details`, `submitted_at`, `scan_id`, `location_name`, `scanned_at`) VALUES
+(1, 'joshiiikms@gmail.com', 1, 1, 'there has been a student nabbed with some narcotics', '2025-07-28 11:53:31', NULL, NULL, NULL),
+(2, 'joshiiikms@gmail.com', 1, 3, 'everything was well', '2025-07-28 16:37:50', NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -115,6 +118,8 @@ CREATE TABLE IF NOT EXISTS `institution_locations` (
   `id` int NOT NULL AUTO_INCREMENT,
   `institution_id` int NOT NULL,
   `name` varchar(250) NOT NULL,
+  `latitude` decimal(10,8) DEFAULT NULL,
+  `longitude` decimal(11,8) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -122,46 +127,48 @@ CREATE TABLE IF NOT EXISTS `institution_locations` (
 -- Dumping data for table `institution_locations`
 --
 
-INSERT INTO `institution_locations` (`id`, `institution_id`, `name`) VALUES
-(1, 1, 'Main Gate'),
-(2, 1, 'Administration block'),
-(3, 1, 'Hostels'),
-(4, 1, 'Club House'),
-(5, 1, 'Stadium Gate'),
-(6, 1, 'Dining Area'),
-(7, 1, 'Hotel'),
-(8, 2, 'Main Gate'),
-(9, 2, 'Administration block'),
-(10, 2, 'Hostels'),
-(11, 2, 'Club House'),
-(12, 2, 'Gate C'),
-(13, 2, 'Dining Area'),
-(14, 3, 'Main Gate'),
-(15, 3, 'Hostels'),
-(16, 3, 'Library'),
-(17, 3, 'Kitchen Area'),
-(18, 3, 'Playground'),
-(19, 3, 'Administration Block'),
-(20, 3, 'Main Parkins'),
-(21, 4, 'Dining Room'),
-(22, 1, 'sewage plant'),
-(23, 1, 'lower prreferbs');
+INSERT INTO `institution_locations` (`id`, `institution_id`, `name`, `latitude`, `longitude`) VALUES
+(1, 1, 'Main Gate', NULL, NULL),
+(2, 1, 'Administration block', NULL, NULL),
+(3, 1, 'Hostels', NULL, NULL),
+(4, 1, 'Club House', NULL, NULL),
+(5, 1, 'Stadium Gate', NULL, NULL),
+(6, 1, 'Dining Area', NULL, NULL),
+(7, 1, 'Hotel', NULL, NULL),
+(8, 2, 'Main Gate', NULL, NULL),
+(9, 2, 'Administration block', NULL, NULL),
+(10, 2, 'Hostels', NULL, NULL),
+(11, 2, 'Club House', NULL, NULL),
+(12, 2, 'Gate C', NULL, NULL),
+(13, 2, 'Dining Area', NULL, NULL),
+(14, 3, 'Main Gate', NULL, NULL),
+(15, 3, 'Hostels', NULL, NULL),
+(16, 3, 'Library', NULL, NULL),
+(17, 3, 'Kitchen Area', NULL, NULL),
+(18, 3, 'Playground', NULL, NULL),
+(19, 3, 'Administration Block', NULL, NULL),
+(20, 3, 'Main Parkins', NULL, NULL),
+(21, 4, 'Dining Room', NULL, NULL),
+(22, 1, 'sewage plant', NULL, NULL),
+(23, 1, 'lower prreferbs', NULL, NULL);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `location_scans`
+-- Table structure for table `location_scan`
 --
 
-DROP TABLE IF EXISTS `location_scans`;
-CREATE TABLE IF NOT EXISTS `location_scans` (
+DROP TABLE IF EXISTS `location_scan`;
+CREATE TABLE IF NOT EXISTS `location_scan` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `institution_id` int DEFAULT NULL,
-  `location_id` int DEFAULT NULL,
-  `location_name` varchar(100) DEFAULT NULL,
-  `ip_address` varchar(45) DEFAULT NULL,
+  `institution_id` int NOT NULL,
+  `location_id` int NOT NULL,
+  `latitude` decimal(10,8) NOT NULL,
+  `longitude` decimal(11,8) NOT NULL,
   `scanned_at` datetime DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `institution_id` (`institution_id`),
+  KEY `location_id` (`location_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
