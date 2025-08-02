@@ -11,7 +11,9 @@ if (!isset($_SESSION['emailaddress'], $_SESSION['institution'], $_SESSION['role'
 $institution_id = $_SESSION['institution'];
 $supervisor_email = $_SESSION['emailaddress'];
 $today = date('Y-m-d');
-
+if (!$institution_id) {
+    die("Institution ID missing from session.");
+}
 // ✅ Present Guards
 $users = mysqli_query($dbconnect, "SELECT * FROM user WHERE role = 'guard' AND institution = $institution_id AND active = 1");
 
@@ -43,4 +45,17 @@ $guardReports = mysqli_query($dbconnect, "
 $guards = $dbconnect->prepare("SELECT emailaddress, firstname, surname FROM user WHERE role = 'guard' AND active = 1 AND institution = ?");
 $guards->bind_param("i", $institution_id);
 $guards->execute();
-$result = $guards->get_result();
+$guardResult = $guards->get_result();
+$guardList = [];
+while ($g = $guardResult->fetch_assoc()) {
+    $guardList[] = $g;
+}
+
+$qrLocations = mysqli_query($dbconnect, "
+    SELECT id, name 
+    FROM institution_locations 
+    WHERE institution_id = '$institution_id'
+");
+if (!$qrLocations) {
+    die("Error fetching locations: " . mysqli_error($dbconnect));
+}

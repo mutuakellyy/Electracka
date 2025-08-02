@@ -18,6 +18,8 @@ require 'header.php';
         <button onclick="showTab('schedule')">📅 Prepare Schedule</button>
         <button onclick="showTab('reports')">📄 Scan Reports</button>
         <button onclick="showTab('submitReport')">📝 Submit Report</button>
+        <button onclick="showTab('qrcodes')">📌 Location QR Codes</button>
+
     </div>
 
     <h2>👨‍✈️ Supervisor Dashboard</h2>
@@ -70,13 +72,20 @@ require 'header.php';
         <form method="POST" action="add_schedule.php">
             <label>Guard Email:</label>
             <select name="guard_email" required>
-                <?php while ($guard = $result->fetch_assoc()): ?>
-                    <option value="<?= $guard['emailaddress'] ?>">
-                        <?= $guard['firstname'], ' ', $guard['surname'] ?> (<?= $guard['emailaddress'] ?>)
-                    </option>
-                <?php endwhile; ?>
+                <?php if (count($guardList) > 0): ?>
+                    <?php foreach ($guardList as $guard): ?>
+                        <option value="<?= $guard['emailaddress'] ?>">
+                            <?= $guard['firstname'] . ' ' . $guard['surname'] ?> (<?= $guard['emailaddress'] ?>)
+                        </option>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <option disabled>No guards found for this institution.</option>
+                <?php endif; ?>
             </select>
 
+            <?php if (mysqli_num_rows($result) === 0) {
+                echo "<p>No guards found for this institution.</p>";
+            } ?>
             <label>Shift Start:</label>
             <input type="datetime-local" name="shift_start" required><br><br>
 
@@ -110,6 +119,11 @@ require 'header.php';
             <button type="submit">Add Location</button>
         </form>
     </div>
+    <?php if (isset($_GET['qr'])): ?>
+        <h4>QR Code for New Location:</h4>
+        <img src="qrcodes/<?= htmlspecialchars($_GET['qr']) ?>" alt="QR Code">
+    <?php endif; ?>
+
 
     <!-- 📄 Reports by Guards -->
     <div id="reports" class="tab">
@@ -147,6 +161,28 @@ require 'header.php';
         </form>
         <p id="reportFeedback" style="margin-top:10px;"></p>
     </div>
+    <!-- 🧾 QR Codes Tab -->
+    <div id="qrcodes" class="tab">
+        <h3>📌 Location QR Codes</h3>
+        <p>Click to download or print QR codes for each location.</p>
+        <div style="display:flex; flex-wrap:wrap; gap:20px;">
+            <?php while ($loc = mysqli_fetch_assoc($qrLocations)):
+                $qrFile = "qrcodes/location_" . $loc['id'] . ".png";
+                if (file_exists($qrFile)):
+                    ?>
+                    <div style="border:1px solid #ccc; padding:10px; text-align:center;">
+                        <h4><?= htmlspecialchars($loc['name']) ?></h4>
+                        <img src="<?= $qrFile ?>" alt="QR for <?= htmlspecialchars($loc['name']) ?>"
+                            style="width:200px;"><br><br>
+                        <a href="<?= $qrFile ?>" download>
+                            <button>⬇️ Download</button>
+                        </a>
+                        <button onclick="printQR('<?= $qrFile ?>')">🖨️ Print</button>
+                    </div>
+                <?php endif; endwhile; ?>
+        </div>
+    </div>
+
 
     <script>
         document.getElementById('supervisorReportForm').addEventListener('submit', function (event) {
@@ -211,6 +247,20 @@ require 'header.php';
                     }
                 });
         });
+        function printQR(src) {
+            const win = window.open('', '_blank');
+            win.document.write(`
+        <html>
+            <head><title>Print QR Code</title></head>
+            <body style="text-align:center;">
+                <img src="${src}" style="width:300px;"><br><br>
+                <button onclick="window.print()">Print</button>
+            </body>
+        </html>
+    `);
+            win.document.close();
+        }
+
     </script>
 </body>
 

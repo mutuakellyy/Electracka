@@ -12,7 +12,16 @@ $email = $_SESSION['emailaddress'];
 $institution_id = $_SESSION['institution'];
 
 // Fetch schedule
-$scheduleQuery = "SELECT s.*, l.name FROM schedules s JOIN institution_locations l ON s.location_id = l.id WHERE s.guard_email = '$email' AND s.institution_id = '$institution_id'";
+$today = date('Y-m-d'); // Get today's date
+
+$scheduleQuery = "
+    SELECT s.*, l.name 
+    FROM schedules s 
+    JOIN institution_locations l ON s.location_id = l.id 
+    WHERE s.guard_email = '$email' 
+      AND s.institution_id = '$institution_id'
+      AND DATE(s.shift_start) = '$today'
+";
 
 $schedules = mysqli_query($dbconnect, $scheduleQuery);
 
