@@ -54,7 +54,7 @@ require 'header.php';
     <!-- Report -->
     <div id="report" class="tab">
         <h3>Report After Scan</h3>
-        <form id="reportForm">
+        <form method="POST" action="submit_guard_report.php" id="reportForm">
             <select name="location_id" id="locationSelect" required>
                 <option disabled selected>Select Location</option>
                 <?php while ($loc = mysqli_fetch_assoc($locations)): ?>
@@ -166,6 +166,9 @@ require 'header.php';
 
             if (scanId) {
                 form.append('scan_id', scanId);
+            } else {
+                document.getElementById('reportFeedback').textContent = '❌ No scan ID found. Please scan before reporting.';
+                return;
             }
 
             fetch('submit_guard_report.php', {

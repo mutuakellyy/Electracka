@@ -1,39 +1,104 @@
 <?php
-require 'db_connect.php';
-require 'vendor/autoload.php'; // ✅ Include Composer autoloader
+declare(strict_types=1);
+
+// Composer autoload (adjust path if your vendor folder is elsewhere)
+require __DIR__ . '/../vendor/autoload.php';
+
+// DB connection file (this file must define $dbconnect as a mysqli connection)
+require __DIR__ . '/db_connect.php';
+
+// Endroid v6 imports — must be declared before other executable code
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
+use Endroid\QrCode\Encoding\Encoding;
+use Endroid\QrCode\ErrorCorrectionLevel;
+
 session_start();
 
-use Endroid\QrCode\Builder\Builder;
-use Endroid\QrCode\Writer\PngWriter;
+// Helpful debug during development (remove or turn off in production)
+ini_set('display_errors', '1');
+error_reporting(E_ALL);
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = mysqli_real_escape_string($dbconnect, $_POST['location_name']);
-    $institution_id = $_SESSION['institution'];
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    echo 'No form submitted.';
+    exit;
+}
 
-    $sql = "INSERT INTO institution_locations (institution_id, name) VALUES ('$institution_id', '$name')";
-    if (mysqli_query($dbconnect, $sql)) {
-        $location_id = mysqli_insert_id($dbconnect);
+// Basic validation
+if (!isset($_SESSION['institution'])) {
+    echo 'Session error: institution not set.';
+    exit;
+}
 
-        // ✅ Generate QR code with location + institution
-        $qrData = json_encode([
-            'location_id' => $location_id,
-            'institution_id' => $institution_id
-        ]);
+$locationName = trim((string)($_POST['location_name'] ?? ''));
+if ($locationName === '') {
+    echo 'Please provide a location name.';
+    exit;
+}
 
-        $qrPath = "qrcodes/location_$location_id.png";
+$institutionId = (int) $_SESSION['institution'];
 
-        Builder::create()
-            ->writer(new PngWriter())
-            ->data($qrData)
-            ->size(300)
-            ->margin(10)
-            ->build()
-            ->saveToFile($qrPath);
+// Insert location using prepared statement
+$insertSql = 'INSERT INTO institution_locations (institution_id, name) VALUES (?, ?)';
+$stmt = mysqli_prepare($dbconnect, $insertSql);
+if ($stmt === false) {
+    echo 'DB prepare failed: ' . mysqli_error($dbconnect);
+    exit;
+}
 
-        // ✅ Redirect with QR filename
-        header("Location: supervisor.php?qr=location_$location_id.png");
-        exit();
-    } else {
-        echo "❌ Failed to add location.";
+mysqli_stmt_bind_param($stmt, 'is', $institutionId, $locationName);
+$execOk = mysqli_stmt_execute($stmt);
+if (! $execOk) {
+    echo 'DB execute failed: ' . mysqli_stmt_error($stmt);
+    exit;
+}
+mysqli_stmt_close($stmt);
+
+$locationId = mysqli_insert_id($dbconnect);
+if (! $locationId) {
+    echo 'Failed to get inserted location id.';
+    exit;
+}
+
+// Build QR payload
+$qrData = json_encode([
+    'location_id'    => $locationId,
+    'institution_id' => $institutionId,
+], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+// Ensure qrcodes directory exists and is writable
+$qrDir = __DIR__ . '/qrcodes';
+if (!is_dir($qrDir)) {
+    if (!mkdir($qrDir, 0777, true) && !is_dir($qrDir)) {
+        echo 'Failed to create qrcodes directory. Check permissions.';
+        exit;
     }
+}
+
+$qrFilename = "location_{$locationId}.png";
+$qrPath = $qrDir . '/' . $qrFilename;
+
+try {
+    // Create QrCode using v6 constructor style
+    $qrCode = new QrCode(
+        data: $qrData,
+        encoding: new Encoding('UTF-8'),
+        errorCorrectionLevel: ErrorCorrectionLevel::Low, // <- use the constant on this class
+        size: 300,
+        margin: 10
+    );
+
+    $writer = new PngWriter();
+    $result = $writer->write($qrCode);
+
+    // Save output file
+    $result->saveToFile($qrPath);
+
+    // Redirect back with filename (adjust URL as needed)
+    header('Location: supervisor.php?qr=' . urlencode($qrFilename));
+    exit;
+} catch (\Throwable $e) {
+    // Catch any writer/Qr errors and show message for debugging
+    echo 'QR generation failed: ' . $e->getMessage();
+    exit;
 }

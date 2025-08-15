@@ -1,6 +1,7 @@
 <?php
 session_start();
 require 'db_connect.php';
+include 'generate_location_qrcodes.php';
 
 if (!isset($_SESSION['emailaddress'], $_SESSION['institution'], $_SESSION['role']) || strtolower($_SESSION['role']) !== 'supervisor') {
     echo "Access Denied.";

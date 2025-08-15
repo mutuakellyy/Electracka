@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $email = $_SESSION['emailaddress'] ?? null;
-$institution_id = $_SESSION['institution_id'] ?? null;
+$institution_id = $_SESSION['institution'] ?? null;
 
 // Validate input
 $location_id = $_POST['location_id'] ?? null;
@@ -24,7 +24,7 @@ if (!$email || !$institution_id || !$location_id || !$details || !$scan_id) {
 
 // Get location name and scanned_at from the scan record
 $location_name = null;
-$scanned_at = null;
+$scanned_at = null; 
 
 $stmt = $dbconnect->prepare("
     SELECT il.name AS location_name, ls.scanned_at
