@@ -64,16 +64,33 @@ tr.inactive {
     background: #f2f2f2;
 }
 
-button.deactivate-btn {
+button.deactivate-btn,
+button.activate-btn {
     padding: 12px 24px;
     font-size: 16px;
-    background-color: #ff4d4d;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    min-width: 120px;         /* Ensures consistent button width */
+    text-align: center;
+    box-sizing: border-box;   /* Prevents padding from affecting width */
+    display: inline-block;
+}
+
+/* Specific colors for each button */
+button.deactivate-btn {
+    background-color: #ff4d4d;
 }
 
 button.deactivate-btn:hover {
     background-color: #ff1a1a;
+}
+
+button.activate-btn {
+    background-color: #4CAF50;
+}
+
+button.activate-btn:hover {
+    background-color: #45a049;
 }

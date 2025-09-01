@@ -185,7 +185,7 @@ require 'signupphp.php';
 				</div>
 			</div>
 
-			<!-- Security Number -->
+			<!-- id Number -->
 			<div id="idnumber-section" class="<?= ($role == 'guard' && !empty($institution_id)) ? '' : 'hidden' ?>"
 				style="margin-top:20px;">
 				<div class="input-box">

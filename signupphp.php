@@ -2,7 +2,7 @@
 require "db_connect.php";
 require "my_function.php";
 
-$firstname = $surname = $securitynumber = $phonenumber = $email = $password = '';
+$firstname = $surname = $idnumber = $phonenumber = $email = $password = '';
 $institution_name = $institution_email = $institution_location = $institution_phone = '';
 $role = '';
 $institution_id = '';
@@ -14,7 +14,7 @@ $success = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $firstname = sanitize($_POST['fname'] ?? '');
     $surname = sanitize($_POST['surname'] ?? '');
-    $securitynumber = sanitize($_POST['securitynumber'] ?? '');
+    $idnumber = sanitize($_POST['idnumber'] ?? '');
     $phonenumber = sanitize($_POST['phonenumber'] ?? '');
     $email = sanitize($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
@@ -38,8 +38,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$surname || !preg_match('/^[a-zA-Z]+$/', $surname)) {
         $error['surname'] = 'Enter a valid surname.';
     }
-    if (!$securitynumber || !ctype_digit($securitynumber)) {
-        $error['securitynumber'] = 'Security number must be digits only.';
+    if (!$idnumber || !ctype_digit($idnumber)) {
+        $error['idnumber'] = 'id number must be digits only.';
     }
     if (!$phonenumber || !ctype_digit($phonenumber) || strlen($phonenumber) != 10) {
         $error['phonenumber'] = 'Phone must be 10 digits.';
@@ -101,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Get institution name for storing in user table
         if (!empty($institution_id)) {
-            $sql = "INSERT INTO user (firstname, surname, id_number, contact, emailaddress, password,institution, role)
+            $sql = "INSERT INTO user (firstname, surname, idnumber, contact, emailaddress, password,institution, role)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             $stmt = $dbconnect->prepare($sql);
             $stmt->bind_param("ssssssss", $firstname, $surname, $idnumber, $phonenumber, $email, $password, $institution_id, $role, );
